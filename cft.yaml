@@ -9,5 +9,5 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID: KMS-KEY-ARN
+              KMSMasterKeyID: ""
     DeletionPolicy: Delete
