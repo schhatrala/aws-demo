@@ -1,13 +1,80 @@
-AWSTemplateFormatVersion: 2010-09-09
-Description: S3 bucket with default encryption
+AWSTemplateFormatVersion: "2010-09-09"
 Resources:
-  EncryptedS3Bucket:
-    Type: 'AWS::S3::Bucket'
+  CognitoDemoUser:
+    Type: AWS::IAM::User
     Properties:
-      BucketName: !Sub 'encryptedbucket-${AWS::Region}-${AWS::AccountId}'
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID: !GetAtt S3Key.Arn
-    DeletionPolicy: Delete
+      UserName: demouser
+      Path: /svc/restricted/
+      Groups:
+          - !Ref CognitoDemoUserGroup
+      Tags:
+        - Key: ServiceTicket
+          Value: "RITM123456"
+        - Key: AccountType
+          Value: "ServiceAccount"
+
+  CognitoDemoUserGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: group-demo-user-us-east-1
+      Path: /svc/restricted/
+      Policies:
+        - PolicyName: policy-demo-user-us-east-1
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Sid: CognitoUserPoolAccess
+              Effect: Allow
+              Action:
+                - cognito-idp:GetDevice
+                - cognito-identity:*
+                - cognito-idp:GetUser
+                - cognito-idp:DescribeUserPoolDomain
+                - cognito-idp:ListDevices
+                - mobileanalytics:PutEvents
+                - cognito-idp:GetUserAttributeVerificationCode
+                - cognito-idp:ListUserPools
+                - cognito-sync:*
+              Resource: "*"
+            - Sid: CognitoB2CAccess
+              Effect: Allow
+              Action:
+                - cognito-idp:AdminGetDevice
+                - cognito-idp:ListIdentityProviders
+                - cognito-idp:GetIdentityProviderByIdentifier
+                - cognito-idp:GetUICustomization
+                - cognito-idp:AdminGetUser
+                - cognito-idp:ListUserPoolClients
+                - cognito-idp:ListUsersInGroup
+                - cognito-idp:DescribeUserPool
+                - cognito-idp:AdminListUserAuthEvents
+                - cognito-idp:ListGroups
+                - cognito-idp:ListResourceServers
+                - cognito-idp:AdminListDevices
+                - cognito-idp:DescribeIdentityProvider
+                - cognito-idp:DescribeResourceServer
+                - cognito-idp:DescribeUserImportJob
+                - cognito-idp:DescribeUserPoolClient
+                - cognito-idp:AdminInitiateAuth
+                - cognito-idp:GetSigningCertificate
+                - cognito-idp:GetCSVHeader
+                - cognito-idp:ListTagsForResource
+                - cognito-idp:GetUserPoolMfaConfig
+                - cognito-idp:GetGroup
+                - cognito-idp:DescribeRiskConfiguration
+                - cognito-idp:AdminListGroupsForUser
+                - cognito-idp:ListUserImportJobs
+                - cognito-idp:ListUsers
+                - cognito-idp:AdminDeleteUser
+                - cognito-idp:AdminUpdateUserAttributes
+                - cognito-idp:AdminAddUserToGroup
+                - cognito-idp:AdminSetUserPassword
+                - cognito-idp:AdminRemoveUserFromGroup
+              Resource:
+                - "arn:aws:cognito-idp:us-east-1:12345678900:userpool/us-east-1"
+            - Sid: CognitoB2CResetPassword
+              Effect: Allow
+              Action:
+                - cognito-idp:AdminSetUserPassword
+              Resource:
+                - "arn:aws:cognito-idp:us-east-1:12345678900:userpool/us-east-1"
